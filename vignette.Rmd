@@ -1,0 +1,10 @@
+---
+title: "Common dplyr idioms for the life sciences"
+author: "Sean Hughes / Claire Levy"
+date: "Monday, January 26, 2015"
+output: html_document
+---
+
+```{r message=FALSE}
+library(dplyr)
+```
