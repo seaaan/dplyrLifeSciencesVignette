@@ -15,26 +15,26 @@ Life scientists often need to perform several common tasks with data generated b
 
 The R package [dplyr](http://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html) package makes data manipulation easy. The idioms described below use `dplyr` to perform these common tasks. 
 
-We'll use a data set from a simple experiment to illustrate these idioms. `expt` contains data from an experiment where samples from four different sources (A, B, C, and D) were exposed to DrugX or DrugY at concentrations of 1, 10, 100, or 1000, or exposed to no drug. Every condition was performed in duplicate. 
+We'll use a data set from a simple experiment to illustrate these idioms. `expt` contains data from an experiment where samples from four different sources (A, B, C, and D) were exposed to DrugX or DrugY at concentrations of 0, 1, 10, 100, or 1000. Every condition was performed in duplicate. 
 
 ```{r message=FALSE, warning=FALSE, results='hide'}
 library(dplyr)
 expt <- read.csv("expt.csv")
 head(expt)
-#>   Sample Treatment Concentration Replicate       Data
-#> 1      A     DrugX             1         1 19.5000000
-#> 2      A     DrugX             1         2  8.0000000
-#> 3      A     DrugX            10         1  3.0909091
-#> 4      A     DrugX            10         2  8.9090909
-#> 5      A     DrugX           100         1  0.2277228
-#> 6      A     DrugX           100         2  0.9504950
+#>     Sample Treatment Concentration Replicate      Data
+#> 1 Sample A    Drug X             0         1 57.000000
+#> 2 Sample A    Drug X             0         2 22.000000
+#> 3 Sample A    Drug X             1         1 33.000000
+#> 4 Sample A    Drug X             1         2 48.000000
+#> 5 Sample A    Drug X            10         1  3.636364
+#> 6 Sample A    Drug X            10         2  4.000000
 str(expt)
-#> 'data.frame':   72 obs. of  5 variables:
-#>  $ Sample       : Factor w/ 4 levels "A","B","C","D": 1 1 1 1 1 1 1 1 1 1 ...
-#>  $ Treatment    : Factor w/ 3 levels "DrugX","DrugY",..: 1 1 1 1 1 1 1 1 2 2 ...
-#>  $ Concentration: int  1 1 10 10 100 100 1000 1000 1 1 ...
-#>  $ Replicate    : int  1 2 1 2 1 2 1 2 1 2 ...
-#>  $ Data         : num  19.5 8 3.091 8.909 0.228 ...
+#> 'data.frame':   80 obs. of  5 variables:
+#> $ Sample       : Factor w/ 4 levels "Sample A","Sample B",..: 1 1 1 1 1 1 1 1 1 1 ...
+#>  $ Treatment    : Factor w/ 2 levels "Drug X","Drug Y": 1 1 1 1 1 1 1 1 1 1 ...
+#> $ Concentration: int  0 0 1 1 10 10 100 100 1000 1000 ...
+#> $ Replicate    : int  1 2 1 2 1 2 1 2 1 2 ...
+#> $ Data         : num  57 22 33 48 3.64 ...
 ```
 
 The `Data` column contains the experimentally-measured data, which decreases with increasing concentration of drug.
@@ -43,9 +43,9 @@ The `Data` column contains the experimentally-measured data, which decreases wit
 library(ggplot2)
 ggplot(expt, aes(factor(Concentration ), log10(Data))) + 
    geom_point(
-      aes(color = Treatment),
+      aes(color = Sample),
       size = 3) + 
-   facet_wrap( ~ Sample) + 
+   facet_wrap( ~ Treatment) + 
    ylab("Response to drug treatment (log10 transformed)") + 
    xlab("Concentration of drug") +
    ggtitle("Samplewise response to drug treatment")
