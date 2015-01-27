@@ -57,7 +57,101 @@ ggplot(expt, aes(factor(Concentration ), log10(Data))) +
 include inter-replicate CV column in addition to avged values
 
 ## Normalize to control data
-%ctrl 
+
+Once replicates are averaged, you often want to adjust the data relative to the control data. Examples of this kind of normalization include: 
+
+* Background subtraction
+* Percent change
+* Fold change 
+* ΔCt and ΔΔCt
+
+In a typical data set, some rows will contain control data and some rows will contain experimental data. That's the case with the `expt` data set, where the rows with Concentration equal to 0 are vehicle controls (exposure to the liquid the drug was dissolved in, but without any drug). 
+
+In this case, we want to view the response in each experimental row (the rows where Concentration isn't 0), as a percentage of the response in the vehicle control rows. There is a vehicle control for each combination of Sample and Treatment and we want to match them up correctly. 
+
+The procedure we will follow is: 
+
+1. Create a data frame with just the vehicle control rows.
+2. Add the data from those rows as a new column to the `expt` data frame, matched by sample and treatment.
+3. Calculate percent control response by operating on those two rows.
+
+### Step 1: Create control data frame
+
+!!!
+
+Once the average replicates section is complete, norep.csv can be deleted and the read.csv line in the chunk below can be removed (since we'll use the `expt` generated above). Note that the `head(...)` output will need to be updated below.
+
+!!!
+
+```{r message=FALSE, warning=FALSE, results='hide'}
+library(dplyr)
+expt <- read.csv("norep.csv")
+
+# subset to control rows
+expt %>%
+   filter(Concentration == 0) -> ctrl
+head(ctrl)
+#>     Sample Treatment Concentration Data
+#> 1 Sample A    Drug X             0   16
+#> 2 Sample A    Drug Y             0   89
+#> 3 Sample B    Drug X             0   25
+#> 4 Sample B    Drug Y             0   17
+#> 5 Sample C    Drug X             0   27
+#> 6 Sample C    Drug Y             0   75
+
+# rename Data to ControlData and remove unneeded columns
+ctrl %>%
+   mutate(ControlData = Data) %>%
+      select(-c(Concentration, Data)) -> ctrl
+head(ctrl)
+#>     Sample Treatment ControlData
+#> 1 Sample A    Drug X          16
+#> 2 Sample A    Drug Y          89
+#> 3 Sample B    Drug X          25
+#> 4 Sample B    Drug Y          17
+#> 5 Sample C    Drug X          27
+#> 6 Sample C    Drug Y          75
+```
+
+The `ctrl` data frame contains the information necessary to match the control data to the appropriate rows based on the values in the Sample and Treatment columns. 
+
+### Step 2: Add control column to `expt`
+
+```{r message=FALSE, warning=FALSE, results='hide'}
+# merge expt and ctrl to add ControlData column matched by
+# Sample and Treatment
+expt <- merge(expt, ctrl)
+head(expt)
+#>    Sample Treatment Concentration        Data ControlData
+#> 1 Sample A    Drug X             0 16.00000000          16
+#> 2 Sample A    Drug X             1  5.50000000          16
+#> 3 Sample A    Drug X            10  8.36363636          16
+#> 4 Sample A    Drug X           100  0.65346535          16
+#> 5 Sample A    Drug X          1000  0.06093906          16
+#> 6 Sample A    Drug Y             0 89.00000000          89
+```
+
+As expected, the ControlData column has the same value for Sample A with Drug X at all concentrations, and this value is the measurement at a concentration of 0. For Sample A with Drug **Y**, there is a new ControlData value.   
+
+### Step 3: Normalize
+
+```{r message=FALSE, warning=FALSE, results='hide'}
+# Add a new column containing the percent control response
+expt <- mutate(expt, 
+   PercentControl = Data / ControlData * 100)
+head(expt)
+#>     Sample Treatment Concentration        Data ControlData PercentControl
+#> 1 Sample A    Drug X             0 16.00000000          16    100.0000000
+#> 2 Sample A    Drug X             1  5.50000000          16     34.3750000
+#> 3 Sample A    Drug X            10  8.36363636          16     52.2727273
+#> 4 Sample A    Drug X           100  0.65346535          16      4.0841584
+#> 5 Sample A    Drug X          1000  0.06093906          16      0.3808691
+#> 6 Sample A    Drug Y             0 89.00000000          89    100.0000000
+```
+
+`expt` now contains a new column with the groupwise percent control response. As expected, PercentControl is always 100% where Concentration is 0. If desired, the control rows could now be removed with `expt <- filter(expt, Concentration != 0)`. 
+
+Steps 1 and 2 would be very similar for any normalization procedure. In step 3, the equation would simply be changed to reflect the desired method. 
 
 ## Exclude outliers
 Inter-replicate CV, too high, too low
