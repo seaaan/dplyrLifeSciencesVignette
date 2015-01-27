@@ -37,7 +37,7 @@ str(expt)
 #> $ Data         : num  57 22 33 48 3.64 ...
 ```
 
-The `Data` column contains the experimentally-measured data, which decreases with increasing concentration of drug.
+The drugs are new antibiotics and the `Data` column contains the experimentally-measured levels of bacterial growth, which decreases with increasing concentration of drug.
 
 ```{r message=FALSE, warning=FALSE}
 library(ggplot2)
@@ -46,7 +46,7 @@ ggplot(expt, aes(factor(Concentration ), log10(Data))) +
       aes(color = Sample),
       size = 3) + 
    facet_wrap( ~ Treatment) + 
-   ylab("Response to drug treatment (log10 transformed)") + 
+   ylab("Bacterial growth (log10 transformed)") + 
    xlab("Concentration of drug") +
    ggtitle("Samplewise response to drug treatment")
 
@@ -65,15 +65,15 @@ Once replicates are averaged, you often want to adjust the data relative to the 
 * Fold change 
 * ΔCt and ΔΔCt
 
-In a typical data set, some rows will contain control data and some rows will contain experimental data. That's the case with the `expt` data set, where the rows with Concentration equal to 0 are vehicle controls (exposure to the liquid the drug was dissolved in, but without any drug). 
+In a typical data set, some rows will contain control data and some rows will contain experimental data. That's the case with the `expt` data set, where the rows with Concentration equal to 0 are vehicle controls (exposed to the liquid the drug was dissolved in, but without any drug). 
 
-In this case, we want to view the response in each experimental row (the rows where Concentration isn't 0), as a percentage of the response in the vehicle control rows. There is a vehicle control for each combination of Sample and Treatment and we want to match them up correctly. 
+In this case, we want to view the bacterial growth in each experimental row (the rows where Concentration isn't 0), as a percentage of the response in the vehicle control rows. There is a vehicle control for each combination of Sample and Treatment and we want to match them up correctly. 
 
 The procedure we will follow is: 
 
 1. Create a data frame with just the vehicle control rows.
-2. Add the data from those rows as a new column to the `expt` data frame, matched by sample and treatment.
-3. Calculate percent control response by operating on those two rows.
+2. Add the bacterial growth control data from the new data frame as a new column to the `expt` data frame, matched by sample and treatment.
+3. Calculate percent control bacterial growth by operating on those two rows.
 
 ### Step 1: Create control data frame
 
@@ -131,7 +131,7 @@ head(expt)
 #> 6 Sample A    Drug Y             0 89.00000000          89
 ```
 
-As expected, the ControlData column has the same value for Sample A with Drug X at all concentrations, and this value is the measurement at a concentration of 0. For Sample A with Drug **Y**, there is a new ControlData value.   
+As expected, the ControlData column has the same value for Sample A with Drug X at all concentrations, and this value is the bacterial growth at a drug concentration of 0. For Sample A with Drug **Y**, there is a new ControlData value.   
 
 ### Step 3: Normalize
 
@@ -149,7 +149,7 @@ head(expt)
 #> 6 Sample A    Drug Y             0 89.00000000          89    100.0000000
 ```
 
-`expt` now contains a new column with the groupwise percent control response. As expected, PercentControl is always 100% where Concentration is 0. If desired, the control rows could now be removed with `expt <- filter(expt, Concentration != 0)`. 
+`expt` now contains a new column with the percent control bacterial growth: that is, the bacterial growth in the conditions exposed to the indicated drug concentration as a percentage of the bacterial growth in the relevant culture without drug exposure. As expected, PercentControl is always 100% where Concentration is 0. If desired, the control rows could now be removed with `expt <- filter(expt, Concentration != 0)`. 
 
 Steps 1 and 2 would be very similar for any normalization procedure. In step 3, the equation would simply be changed to reflect the desired method. 
 
