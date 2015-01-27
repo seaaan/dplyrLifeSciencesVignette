@@ -1,8 +1,10 @@
 ---
 title: "Common dplyr idioms for the life sciences"
-author: "Sean Hughes / Claire Levy"
-date: "Monday, January 26, 2015"
-output: html_document
+author: "Sean Hughes & Claire Levy"
+output: 
+   html_document:
+      theme: readable
+      highlight: kate
 ---
 
 ## Introduction
@@ -75,7 +77,7 @@ The procedure we will follow is:
 2. Add the bacterial growth control data from the new data frame as a new column to the `expt` data frame, matched by sample and treatment.
 3. Calculate percent control bacterial growth by operating on those two rows.
 
-### Step 1: Create control data frame
+#### Step 1: Create control data frame
 
 !!!
 
@@ -115,7 +117,7 @@ head(ctrl)
 
 The `ctrl` data frame contains the information necessary to match the control data to the appropriate rows based on the values in the Sample and Treatment columns. 
 
-### Step 2: Add control column to `expt`
+#### Step 2: Add control column to `expt`
 
 ```{r message=FALSE, warning=FALSE, results='hide'}
 # merge expt and ctrl to add ControlData column matched by
@@ -133,7 +135,7 @@ head(expt)
 
 As expected, the ControlData column has the same value for Sample A with Drug X at all concentrations, and this value is the bacterial growth at a drug concentration of 0. For Sample A with Drug **Y**, there is a new ControlData value.   
 
-### Step 3: Normalize
+#### Step 3: Normalize
 
 ```{r message=FALSE, warning=FALSE, results='hide'}
 # Add a new column containing the percent control response
